@@ -1,8 +1,10 @@
 package ru.netology.consolechat.common;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.Socket;
 
-public class Connection {
+public class Connection implements Closeable {
     private final String user;
     private final Socket socket;
     private ConnectionStatus status;
@@ -26,9 +28,12 @@ public class Connection {
         return status;
     }
 
-    public synchronized Connection setStatus(ConnectionStatus status) {
+    public synchronized void setStatus(ConnectionStatus status) {
         this.status = status;
+    }
 
-        return this;
+    @Override
+    public synchronized void close() throws IOException {
+        socket.close();
     }
 }

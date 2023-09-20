@@ -9,6 +9,9 @@ public class MessageReader implements ProtocolReader {
 
     @Override
     public Message read(InputStream input) throws IOException, ClassNotFoundException {
+        if (input.available() < 4) {
+            return null;
+        }
         Integer size = (Integer) fromByteArray(input.readNBytes(4));
         return (Message) fromByteArray(input.readNBytes(size));
     }
