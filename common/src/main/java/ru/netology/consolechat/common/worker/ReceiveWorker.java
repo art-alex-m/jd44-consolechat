@@ -25,6 +25,15 @@ public class ReceiveWorker implements Runnable {
     @Override
     public void run() {
         while (!Thread.interrupted()) {
+            if (connectionsQueue.isEmpty()) {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                continue;
+            }
+            /// FIXME: Создает много итераторов, чем загружает кучу. Возможно ли использовать один итератор или другой тип очереди
             for (Connection connection : connectionsQueue) {
                 try {
                     Message message = reader.read(connection.getSocket().getInputStream());
@@ -37,8 +46,8 @@ public class ReceiveWorker implements Runnable {
                     }
                 } catch (IOException ex) {
                     connection.setStatus(ConnectionStatus.CLOSED);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         }

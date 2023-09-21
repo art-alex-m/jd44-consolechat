@@ -18,14 +18,17 @@ public class LogWorker implements Runnable {
 
     @Override
     public void run() {
-        try(FileWriter out = new FileWriter(logfile, true)) {
+        try(BufferedWriter out = new BufferedWriter(new FileWriter(logfile, true), 10);) {
             while (!Thread.interrupted()) {
                 try {
                     Message message = messages.poll(10, TimeUnit.MILLISECONDS);
                     if (message == null) continue;
                     out.write(messageToString(message));
+                    if (messages.isEmpty()) {
+                        out.flush();
+                    }
                 } catch (InterruptedException e) {
-                    return;
+                    break;
                 }
             }
         } catch (IOException ex) {
