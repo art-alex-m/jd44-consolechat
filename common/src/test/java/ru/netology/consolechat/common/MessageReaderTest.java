@@ -37,7 +37,7 @@ class MessageReaderTest {
     public void fromByteArray_Integer() {
         byte[] bytes = SerializationUtils.serialize(244);
         Integer result = null;
-
+        System.out.println(bytes.length);
         try {
             result = (Integer) sut.fromByteArray(bytes);
         } catch (IOException | ClassNotFoundException ignored) {

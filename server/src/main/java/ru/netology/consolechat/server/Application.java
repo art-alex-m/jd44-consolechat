@@ -6,7 +6,6 @@ import ru.netology.consolechat.common.worker.ReceiveWorker;
 import ru.netology.consolechat.common.worker.SendWorker;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.*;
@@ -24,14 +23,8 @@ public class Application implements Runnable {
         BlockingQueue<Message> loggerQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
         ConcurrentLinkedQueue<Connection> connectionsQueue = new ConcurrentLinkedQueue<>();
         BlockingQueue<Socket> clientSocketQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
-        ProtocolWriter protocolWriter;
-        ProtocolReader protocolReader;
-        try {
-            protocolWriter = new MessageWriter();
-            protocolReader = new MessageReader();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ProtocolWriter protocolWriter = new MessageWriter();
+        ProtocolReader protocolReader = new MessageReader();
 
         LogWorker logWorker = new LogWorker(logfile, loggerQueue);
         SendWorker sendWorker = new SendWorker(senderQueue, connectionsQueue, protocolWriter);

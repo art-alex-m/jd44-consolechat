@@ -19,11 +19,7 @@ class MessageWriterTest {
 
     @BeforeEach
     protected void setUp() {
-        try {
-            sut = new MessageWriter();
-        } catch (IOException e) {
-            throw new IllegalCallerException(e);
-        }
+        sut = new MessageWriter();
     }
 
     @ParameterizedTest

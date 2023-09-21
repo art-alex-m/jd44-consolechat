@@ -25,6 +25,15 @@ public class SendWorker implements Runnable {
     @Override
     public void run() {
         while (!Thread.interrupted()) {
+            if (connectionsQueue.isEmpty()) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                continue;
+            }
+
             Message message;
             try {
                 message = senderQueue.poll(10, TimeUnit.MILLISECONDS);
@@ -34,7 +43,7 @@ public class SendWorker implements Runnable {
             if (message == null) continue;
             for(Connection connection: connectionsQueue) {
                 try {
-                    writer.write(connection.getSocket().getOutputStream(), message);
+                    writer.write(connection.getOutputStream(), message);
                 } catch (IOException e) {
                     connection.setStatus(ConnectionStatus.CLOSED);
                 }

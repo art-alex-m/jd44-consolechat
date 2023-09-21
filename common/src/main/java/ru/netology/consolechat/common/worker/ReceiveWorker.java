@@ -6,6 +6,7 @@ import ru.netology.consolechat.common.Message;
 import ru.netology.consolechat.common.ProtocolReader;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,6 +16,8 @@ public class ReceiveWorker implements Runnable {
     private final ConcurrentLinkedQueue<Connection> connectionsQueue;
     private final ProtocolReader reader;
 
+    private boolean loop = true;
+
     public ReceiveWorker(List<BlockingQueue<Message>> consumerQueue, ConcurrentLinkedQueue<Connection> connectionsQueue,
                          ProtocolReader reader) {
         this.consumerQueue = consumerQueue;
@@ -22,9 +25,13 @@ public class ReceiveWorker implements Runnable {
         this.reader = reader;
     }
 
+    public synchronized void deactivate() {
+        loop = false;
+    }
+
     @Override
     public void run() {
-        while (!Thread.interrupted()) {
+        while (loop && !Thread.interrupted()) {
             if (connectionsQueue.isEmpty()) {
                 try {
                     Thread.sleep(20);
@@ -36,8 +43,9 @@ public class ReceiveWorker implements Runnable {
             /// FIXME: Создает много итераторов, чем загружает кучу. Возможно ли использовать один итератор или другой тип очереди
             for (Connection connection : connectionsQueue) {
                 try {
-                    Message message = reader.read(connection.getSocket().getInputStream());
+                    Message message = reader.read(connection.getInputStream());
                     if (message == null) continue;
+                    message.setReceivedAt(LocalDateTime.now());
                     for (BlockingQueue<Message> queue : consumerQueue) {
                         try {
                             queue.put(message);

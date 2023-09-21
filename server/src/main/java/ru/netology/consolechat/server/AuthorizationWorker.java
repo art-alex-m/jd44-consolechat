@@ -5,6 +5,7 @@ import ru.netology.consolechat.common.ConnectionStatus;
 import ru.netology.consolechat.common.Message;
 import ru.netology.consolechat.common.ProtocolReader;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
@@ -24,38 +25,53 @@ public class AuthorizationWorker implements Runnable {
 
     @Override
     public void run() {
-        while(!Thread.interrupted()) {
-            Socket clentSocket;
+        while (!Thread.interrupted()) {
+            Socket clientSocket;
             try {
-                clentSocket = clientSocketQueue.take();
+                clientSocket = clientSocketQueue.take();
             } catch (InterruptedException e) {
-                break;
+                continue;
             }
+            System.out.println("New client socket received");
             Message message = null;
-            try {
-                int timeout = 0;
-                while (message == null && timeout < 500) {
-                    message = protocolReader.read(clentSocket.getInputStream());
-                    Thread.sleep(10);
-                    timeout += 10;
+            int timeout = 0;
+            while (message == null && timeout < 1000) {
+                try {
+                    message = protocolReader.read(new DataInputStream(clientSocket.getInputStream()));
+                } catch (IOException | NullPointerException e) {
+                    closeSocket(clientSocket);
+                    break;
+                } catch (ClassNotFoundException e) {
+                    closeSocket(clientSocket);
+                    throw new RuntimeException(e);
                 }
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
-                break;
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignored) {
+                }
+                timeout += 10;
             }
 
             if (message == null) {
-                try {
-                    clentSocket.close();
-                } catch (IOException ignored) {
-                }
+                closeSocket(clientSocket);
                 continue;
             }
 
-            Connection connection = new Connection(message.getContent(), clentSocket);
-            connection.setStatus(ConnectionStatus.AUTHORIZED);
-            connectionsQueue.add(connection);
+            try {
+                Connection connection = new Connection(message.getContent(), clientSocket);
+                connection.setStatus(ConnectionStatus.AUTHORIZED);
+                connectionsQueue.add(connection);
+            } catch (IOException e) {
+                closeSocket(clientSocket);
+            }
+        }
+    }
+
+    private void closeSocket(Socket socket) {
+        try {
+            socket.close();
+        } catch (IOException ignored) {
+
         }
     }
 }

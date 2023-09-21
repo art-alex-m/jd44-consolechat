@@ -1,7 +1,6 @@
 package ru.netology.consolechat.server;
 
 import ru.netology.consolechat.common.Connection;
-import ru.netology.consolechat.common.ConnectionStatus;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -16,6 +15,6 @@ public class CleaningWorker implements Runnable {
     @Override
     public void run() {
         if (connectionsQueue.isEmpty()) return;
-        connectionsQueue.removeIf(c -> c.getStatus() == ConnectionStatus.CLOSED);
+        connectionsQueue.removeIf(Connection::isClosed);
     }
 }
