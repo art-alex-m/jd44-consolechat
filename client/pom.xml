@@ -26,12 +26,14 @@
     </dependencies>
 
     <build>
+        <directory>${project.basedir}/../target/client</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
+                    <outputDirectory>${build.directory}/../</outputDirectory>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>

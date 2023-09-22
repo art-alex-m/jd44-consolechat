@@ -1,0 +1,4 @@
+host=localhost
+port=8080
+messageQueueCapacity=10
+logfile=log/messages-client-log.txt

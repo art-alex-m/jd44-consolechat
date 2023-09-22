@@ -1,0 +1,3 @@
+port=8080
+messageQueueCapacity=1000
+logfile=log/messages-server-log.txt
