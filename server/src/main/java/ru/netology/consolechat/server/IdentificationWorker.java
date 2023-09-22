@@ -12,13 +12,13 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class AuthorizationWorker implements Sleepable, Runnable {
+public class IdentificationWorker implements Sleepable, Runnable {
     private final ConcurrentLinkedQueue<Connection> connectionsQueue;
     private final BlockingQueue<Socket> clientSocketQueue;
     private final ProtocolReader protocolReader;
 
-    public AuthorizationWorker(ConcurrentLinkedQueue<Connection> connectionsQueue, BlockingQueue<Socket> clientSocketQueue,
-                               ProtocolReader protocolReader) {
+    public IdentificationWorker(ConcurrentLinkedQueue<Connection> connectionsQueue, BlockingQueue<Socket> clientSocketQueue,
+                                ProtocolReader protocolReader) {
         this.connectionsQueue = connectionsQueue;
         this.clientSocketQueue = clientSocketQueue;
         this.protocolReader = protocolReader;
@@ -64,7 +64,7 @@ public class AuthorizationWorker implements Sleepable, Runnable {
             Connection connection = new Connection(message.getContent(), clientSocket);
             connection.setStatus(ConnectionStatus.AUTHORIZED);
             connectionsQueue.add(connection);
-            System.out.printf("Client %s:%s authorized%n", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
+            System.out.printf("Client %s:%s identified%n", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
         } catch (IOException e) {
             closeSocket(clientSocket);
         }

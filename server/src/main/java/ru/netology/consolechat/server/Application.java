@@ -43,13 +43,13 @@ public class Application implements Sleepable, Runnable {
         SendWorker sendWorker = new SendWorker(senderQueue, connectionsQueue, protocolWriter);
         ReceiveWorker receiveWorker = new ReceiveWorker(List.of(senderQueue, loggerQueue), connectionsQueue, protocolReader);
         ServerWorker serverWorker = new ServerWorker(Integer.parseInt(properties.getProperty("port", "8088")), clientSocketQueue);
-        AuthorizationWorker authorizationWorker = new AuthorizationWorker(connectionsQueue, clientSocketQueue, protocolReader);
+        IdentificationWorker identificationWorker = new IdentificationWorker(connectionsQueue, clientSocketQueue, protocolReader);
         CleaningWorker cleaningWorker = new CleaningWorker(connectionsQueue);
 
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutor.scheduleWithFixedDelay(cleaningWorker, 200, 200, TimeUnit.MILLISECONDS);
-        Stream.of(logWorker, sendWorker, receiveWorker, serverWorker, authorizationWorker).forEach(executorService::submit);
+        Stream.of(logWorker, sendWorker, receiveWorker, serverWorker, identificationWorker).forEach(executorService::submit);
 
         while (!Thread.interrupted() && sleep(200)) ;
     }
