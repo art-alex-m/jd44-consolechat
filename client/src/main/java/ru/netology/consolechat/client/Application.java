@@ -6,22 +6,28 @@ import ru.netology.consolechat.common.worker.ReceiveWorker;
 import ru.netology.consolechat.common.worker.SendWorker;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 public class Application implements Runnable {
     private final static String EXIT_MESSAGE = "/exit";
+    private final static File CONF_FILE = new File("etc/client.conf");
 
     @Override
     public void run() {
-        String host = "localhost";
-        int port = 8080;
-        int messageQueueCapacity = 10;
-        File logfile = new File("messages-client-log.txt");
+        /// load configuration
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(CONF_FILE));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         /// greeting user
         Scanner scanner = new Scanner(System.in);
@@ -31,6 +37,7 @@ public class Application implements Runnable {
         Message greetingMessage = new Message(name, name);
 
         /// start application workers
+        int messageQueueCapacity = Integer.parseInt(properties.getProperty("messageQueueCapacity"));
         BlockingQueue<Message> senderQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
         BlockingQueue<Message> loggerQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
         BlockingQueue<Message> consoleQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
@@ -38,7 +45,7 @@ public class Application implements Runnable {
         ProtocolWriter protocolWriter = new MessageWriter();
         ProtocolReader protocolReader = new MessageReader();
 
-        LogWorker logWorker = new LogWorker(logfile, loggerQueue);
+        LogWorker logWorker = new LogWorker(new File(properties.getProperty("logfile")), loggerQueue);
         SendWorker sendWorker = new SendWorker(senderQueue, connectionsQueue, protocolWriter);
         ReceiveWorker receiveWorker = new ReceiveWorker(List.of(loggerQueue, consoleQueue), connectionsQueue, protocolReader);
         ConsoleOutputWorker consoleOutputWorker = new ConsoleOutputWorker(consoleQueue);
@@ -49,7 +56,7 @@ public class Application implements Runnable {
         /// send greeting message to server
         Connection connection;
         try {
-            Socket clientSocket = new Socket(host, port);
+            Socket clientSocket = new Socket(properties.getProperty("host"), Integer.parseInt(properties.getProperty("port")));
             connection = new Connection(name, clientSocket);
             connectionsQueue.add(connection);
             senderQueue.put(greetingMessage);

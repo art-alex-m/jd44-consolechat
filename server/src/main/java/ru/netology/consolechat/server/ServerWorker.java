@@ -17,6 +17,7 @@ public class ServerWorker implements Runnable {
     @Override
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port, 50)) {
+            System.out.println("Ready to accept connections on port " + port);
             while (!Thread.interrupted()) {
                 Socket clientSocket = serverSocket.accept();
                 clientSocketQueue.put(clientSocket);

@@ -61,6 +61,7 @@ public class AuthorizationWorker implements Runnable {
                 Connection connection = new Connection(message.getContent(), clientSocket);
                 connection.setStatus(ConnectionStatus.AUTHORIZED);
                 connectionsQueue.add(connection);
+                System.out.printf("Client %s:%s authorized", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
             } catch (IOException e) {
                 closeSocket(clientSocket);
             }
