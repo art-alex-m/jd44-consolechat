@@ -4,6 +4,7 @@ import ru.netology.consolechat.common.*;
 import ru.netology.consolechat.common.worker.LogWorker;
 import ru.netology.consolechat.common.worker.ReceiveWorker;
 import ru.netology.consolechat.common.worker.SendWorker;
+import ru.netology.consolechat.common.worker.Sleepable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,7 +15,7 @@ import java.util.Properties;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
-public class Application implements Runnable {
+public class Application implements Sleepable, Runnable {
     private final static File CONF_FILE = new File("etc/server.conf");
 
     @Override
@@ -29,6 +30,7 @@ public class Application implements Runnable {
 
         System.out.println("Consolechat Server is starting");
 
+        /// init server application
         int messageQueueCapacity = Integer.parseInt(properties.getProperty("messageQueueCapacity", "100"));
         BlockingQueue<Message> senderQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
         BlockingQueue<Message> loggerQueue = new LinkedBlockingQueue<>(messageQueueCapacity);
@@ -49,12 +51,6 @@ public class Application implements Runnable {
         scheduledExecutor.scheduleWithFixedDelay(cleaningWorker, 200, 200, TimeUnit.MILLISECONDS);
         Stream.of(logWorker, sendWorker, receiveWorker, serverWorker, authorizationWorker).forEach(executorService::submit);
 
-        while (!Thread.interrupted()) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        while (!Thread.interrupted() && sleep(200)) ;
     }
 }

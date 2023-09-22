@@ -15,12 +15,15 @@ public class ConsoleOutputWorker implements Runnable {
     @Override
     public void run() {
         while (!Thread.interrupted()) {
-            try {
-                Message message = messages.take();
-                System.out.print(messageToScreen(message));
-            } catch (InterruptedException e) {
-                return;
-            }
+            doWork();
+        }
+    }
+
+    public void doWork() {
+        try {
+            Message message = messages.take();
+            System.out.print(messageToScreen(message));
+        } catch (InterruptedException ignored) {
         }
     }
 

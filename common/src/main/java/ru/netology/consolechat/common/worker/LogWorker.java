@@ -24,8 +24,7 @@ public class LogWorker implements Runnable {
         try(BufferedWriter out = new BufferedWriter(new FileWriter(logfile, true), 10)) {
             while (!Thread.interrupted()) {
                 try {
-                    Message message = messages.poll(10, TimeUnit.MILLISECONDS);
-                    if (message == null) continue;
+                    Message message = messages.take();
                     out.write(messageToString(message));
                     if (messages.isEmpty()) {
                         out.flush();

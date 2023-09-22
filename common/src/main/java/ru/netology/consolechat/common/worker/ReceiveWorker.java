@@ -11,21 +11,21 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ReceiveWorker implements Runnable {
-    private final List<BlockingQueue<Message>> consumerQueue;
+public class ReceiveWorker implements Sleepable, Runnable {
+    private final List<BlockingQueue<Message>> consumerQueues;
     private final ConcurrentLinkedQueue<Connection> connectionsQueue;
     private final ProtocolReader reader;
 
     private boolean loop = true;
 
-    public ReceiveWorker(List<BlockingQueue<Message>> consumerQueue, ConcurrentLinkedQueue<Connection> connectionsQueue,
+    public ReceiveWorker(List<BlockingQueue<Message>> consumerQueues, ConcurrentLinkedQueue<Connection> connectionsQueue,
                          ProtocolReader reader) {
-        this.consumerQueue = consumerQueue;
+        this.consumerQueues = consumerQueues;
         this.connectionsQueue = connectionsQueue;
         this.reader = reader;
     }
 
-    public synchronized void deactivate() {
+    public void deactivate() {
         loop = false;
     }
 
@@ -33,30 +33,29 @@ public class ReceiveWorker implements Runnable {
     public void run() {
         while (loop && !Thread.interrupted()) {
             if (connectionsQueue.isEmpty()) {
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    return;
-                }
+                if (!sleep(20)) deactivate();
                 continue;
             }
-            /// FIXME: Создает много итераторов, чем загружает кучу. Возможно ли использовать один итератор или другой тип очереди
-            for (Connection connection : connectionsQueue) {
-                try {
-                    Message message = reader.read(connection.getInputStream());
-                    if (message == null) continue;
-                    message.setReceivedAt(LocalDateTime.now());
-                    for (BlockingQueue<Message> queue : consumerQueue) {
-                        try {
-                            queue.put(message);
-                        } catch (InterruptedException ignored) {
-                        }
+            doWork();
+        }
+    }
+
+    public void doWork() {
+        for (Connection connection : connectionsQueue) {
+            try {
+                Message message = reader.read(connection.getInputStream());
+                if (message == null) continue;
+                message.setReceivedAt(LocalDateTime.now());
+                for (BlockingQueue<Message> queue : consumerQueues) {
+                    try {
+                        queue.put(message);
+                    } catch (InterruptedException ignored) {
                     }
-                } catch (IOException ex) {
-                    connection.setStatus(ConnectionStatus.CLOSED);
-                } catch (ClassNotFoundException ex) {
-                    throw new RuntimeException(ex);
                 }
+            } catch (IOException ex) {
+                connection.setStatus(ConnectionStatus.CLOSED);
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }

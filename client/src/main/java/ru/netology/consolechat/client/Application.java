@@ -4,6 +4,7 @@ import ru.netology.consolechat.common.*;
 import ru.netology.consolechat.common.worker.LogWorker;
 import ru.netology.consolechat.common.worker.ReceiveWorker;
 import ru.netology.consolechat.common.worker.SendWorker;
+import ru.netology.consolechat.common.worker.Sleepable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +16,7 @@ import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
-public class Application implements Runnable {
+public class Application implements Sleepable, Runnable {
     private final static String EXIT_MESSAGE = "/exit";
     private final static File CONF_FILE = new File("etc/client.conf");
 
@@ -31,8 +32,8 @@ public class Application implements Runnable {
 
         /// greeting user
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Добро пожаловать в чат");
-        System.out.println("Введите имя пользователя");
+        System.out.println("Welcome to console chat");
+        System.out.println("Enter your name");
         String name = scanner.nextLine();
         Message greetingMessage = new Message(name, name);
 
@@ -65,16 +66,16 @@ public class Application implements Runnable {
         }
 
         /// start listening new messages from user
-        System.out.println("Вводите новые сообщения");
+        System.out.println("Enter new messages");
         while (!Thread.interrupted()) {
             try {
                 String content = scanner.nextLine();
                 if (connection.isClosed()) {
-                    System.out.println("Соединение закрыто сервером");
+                    System.out.println("Connection closed by server");
                     break;
                 }
                 if (EXIT_MESSAGE.equals(content)) {
-                    System.out.println("Выход из программы");
+                    System.out.println("Exit the program");
                     break;
                 }
                 senderQueue.put(new Message(content, connection.getUser()));
@@ -89,12 +90,6 @@ public class Application implements Runnable {
             connection.close();
         } catch (IOException ignored) {
         }
-        while (!loggerQueue.isEmpty()) {
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
+        while (!loggerQueue.isEmpty() && sleep(20));
     }
 }
