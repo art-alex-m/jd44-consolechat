@@ -90,6 +90,6 @@ public class Application implements Sleepable, Runnable {
             connection.close();
         } catch (IOException ignored) {
         }
-        while (!loggerQueue.isEmpty() && sleep(20));
+        while (!loggerQueue.isEmpty() && sleep(20)) ;
     }
 }

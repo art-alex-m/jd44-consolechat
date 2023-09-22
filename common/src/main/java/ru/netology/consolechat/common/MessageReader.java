@@ -18,8 +18,8 @@ public class MessageReader implements ProtocolReader {
     }
 
     public Object fromByteArray(byte[] data) throws ClassNotFoundException, IOException {
-        try(ByteArrayInputStream bytes = new ByteArrayInputStream(data);
-            ObjectInputStream inputStream = new ObjectInputStream(bytes)) {
+        try (ByteArrayInputStream bytes = new ByteArrayInputStream(data);
+             ObjectInputStream inputStream = new ObjectInputStream(bytes)) {
             return inputStream.readObject();
         }
     }

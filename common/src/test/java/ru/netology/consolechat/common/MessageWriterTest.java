@@ -38,8 +38,8 @@ class MessageWriterTest {
 
     protected Stream<Arguments> toByteArray() {
         return Stream.of(
-                new Message("test", "user"),
-                244
+                        new Message("test", "user"),
+                        244
                 )
                 .map(m -> Arguments.of(m, SerializationUtils.serialize(m)));
     }

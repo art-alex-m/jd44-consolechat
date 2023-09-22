@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public class LogWorker implements Runnable {
     private final File logfile;
@@ -21,7 +20,7 @@ public class LogWorker implements Runnable {
 
     @Override
     public void run() {
-        try(BufferedWriter out = new BufferedWriter(new FileWriter(logfile, true), 10)) {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(logfile, true), 10)) {
             while (!Thread.interrupted()) {
                 try {
                     Message message = messages.take();

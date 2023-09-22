@@ -6,10 +6,8 @@ import ru.netology.consolechat.common.Message;
 import ru.netology.consolechat.common.ProtocolWriter;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 
 public class SendWorker implements Sleepable, Runnable {
     private final BlockingQueue<Message> senderQueue;
@@ -43,7 +41,7 @@ public class SendWorker implements Sleepable, Runnable {
             return;
         }
 
-        for(Connection connection: connectionsQueue) {
+        for (Connection connection : connectionsQueue) {
             try {
                 writer.write(connection.getOutputStream(), message);
             } catch (IOException e) {

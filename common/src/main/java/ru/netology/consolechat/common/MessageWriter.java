@@ -18,8 +18,8 @@ public class MessageWriter implements ProtocolWriter {
     }
 
     public byte[] toByteArray(Object obj) throws IOException {
-        try(ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            ObjectOutputStream outputStream = new ObjectOutputStream(byteStream)) {
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+             ObjectOutputStream outputStream = new ObjectOutputStream(byteStream)) {
             outputStream.writeObject(obj);
 
             return byteStream.toByteArray();
