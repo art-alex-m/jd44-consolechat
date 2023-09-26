@@ -15,7 +15,7 @@ import java.util.Properties;
 import java.util.concurrent.*;
 import java.util.stream.Stream;
 
-public class Application implements Sleepable, Runnable {
+public class ConsolechatServer implements Sleepable, Runnable {
     private final static File CONF_FILE = new File("etc/server.conf");
 
     @Override

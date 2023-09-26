@@ -2,6 +2,6 @@ package ru.netology.consolechat.client;
 
 public class Main {
     public static void main(String[] args) {
-        new Application().run();
+        new ConsolechatClient().run();
     }
 }
