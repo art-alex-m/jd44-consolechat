@@ -25,7 +25,7 @@ public class SendWorker implements Sleepable, Runnable {
     public void run() {
         while (!Thread.interrupted()) {
             if (connectionsQueue.isEmpty()) {
-                sleep(20);
+                sleep();
                 continue;
             }
 

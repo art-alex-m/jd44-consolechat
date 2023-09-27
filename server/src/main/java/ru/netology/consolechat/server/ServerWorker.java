@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 public class ServerWorker implements Runnable {
+    private final static int SOCKET_BACKLOG = 50;
     private final int port;
     private final BlockingQueue<Socket> clientSocketQueue;
 
@@ -16,7 +17,7 @@ public class ServerWorker implements Runnable {
 
     @Override
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(port, 50)) {
+        try (ServerSocket serverSocket = new ServerSocket(port, SOCKET_BACKLOG)) {
             System.out.println("Ready to accept connections on port " + port);
             while (!Thread.interrupted()) {
                 Socket clientSocket = serverSocket.accept();

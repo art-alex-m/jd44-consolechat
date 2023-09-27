@@ -13,9 +13,10 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.*;
-import java.util.stream.Stream;
 
 public class ConsolechatServer implements Sleepable, Runnable {
+    private final static int SLEEP_TIME = 200;
+    private final static int CLEANING_SCHEDULE_DELAY = 200;
     private final static File CONF_FILE = new File("etc/server.conf");
 
     @Override
@@ -46,11 +47,12 @@ public class ConsolechatServer implements Sleepable, Runnable {
         IdentificationWorker identificationWorker = new IdentificationWorker(connectionsQueue, clientSocketQueue, protocolReader);
         CleaningWorker cleaningWorker = new CleaningWorker(connectionsQueue);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        List<Runnable> workers = List.of(logWorker, sendWorker, receiveWorker, serverWorker, identificationWorker);
+        ExecutorService executorService = Executors.newFixedThreadPool(workers.size());
+        workers.forEach(executorService::submit);
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutor.scheduleWithFixedDelay(cleaningWorker, 200, 200, TimeUnit.MILLISECONDS);
-        Stream.of(logWorker, sendWorker, receiveWorker, serverWorker, identificationWorker).forEach(executorService::submit);
+        scheduledExecutor.scheduleWithFixedDelay(cleaningWorker, CLEANING_SCHEDULE_DELAY, CLEANING_SCHEDULE_DELAY, TimeUnit.MILLISECONDS);
 
-        while (!Thread.interrupted() && sleep(200)) ;
+        while (!Thread.interrupted() && sleep(SLEEP_TIME)) ;
     }
 }

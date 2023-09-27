@@ -33,11 +33,11 @@ public class ReceiveWorker implements Sleepable, Runnable {
     public void run() {
         while (loop && !Thread.interrupted()) {
             if (connectionsQueue.isEmpty()) {
-                if (!sleep(20)) deactivate();
+                if (!sleep()) deactivate();
                 continue;
             }
             doWork();
-            sleep(10);
+            sleep();
         }
     }
 

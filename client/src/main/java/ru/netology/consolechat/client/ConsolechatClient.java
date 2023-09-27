@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.stream.Stream;
 
 public class ConsolechatClient implements Sleepable, Runnable {
     private final static String EXIT_MESSAGE = "/exit";
@@ -51,8 +50,9 @@ public class ConsolechatClient implements Sleepable, Runnable {
         ReceiveWorker receiveWorker = new ReceiveWorker(List.of(loggerQueue, consoleQueue), connectionsQueue, protocolReader);
         ConsoleOutputWorker consoleOutputWorker = new ConsoleOutputWorker(consoleQueue);
 
-        ExecutorService executorService = Executors.newWorkStealingPool(4);
-        Stream.of(logWorker, sendWorker, receiveWorker, consoleOutputWorker).forEach(executorService::submit);
+        List<Runnable> workers = List.of(logWorker, sendWorker, receiveWorker, consoleOutputWorker);
+        ExecutorService executorService = Executors.newWorkStealingPool(workers.size());
+        workers.forEach(executorService::submit);
 
         /// send greeting message to server
         Connection connection;
@@ -90,6 +90,6 @@ public class ConsolechatClient implements Sleepable, Runnable {
             connection.close();
         } catch (IOException ignored) {
         }
-        while (!loggerQueue.isEmpty() && sleep(20)) ;
+        while (!loggerQueue.isEmpty() && sleep()) ;
     }
 }

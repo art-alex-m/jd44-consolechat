@@ -6,10 +6,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class MessageReader implements ProtocolReader {
+    private final static int INTEGER_LENGTH = 4;
 
     @Override
     public Message read(DataInputStream input) throws IOException, ClassNotFoundException {
-        if (input.available() < 4) {
+        if (input.available() < INTEGER_LENGTH) {
             return null;
         }
         int size = input.readInt();

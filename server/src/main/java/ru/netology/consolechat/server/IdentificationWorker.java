@@ -13,6 +13,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class IdentificationWorker implements Sleepable, Runnable {
+    private final static int MESSAGE_TIMEOUT = 1000;
+    private final static int SLEEP_TIME = 10;
     private final ConcurrentLinkedQueue<Connection> connectionsQueue;
     private final BlockingQueue<Socket> clientSocketQueue;
     private final ProtocolReader protocolReader;
@@ -41,7 +43,7 @@ public class IdentificationWorker implements Sleepable, Runnable {
         System.out.println("New client socket received");
         Message message = null;
         int timeout = 0;
-        while (message == null && timeout < 1000) {
+        while (message == null && timeout < MESSAGE_TIMEOUT) {
             try {
                 message = protocolReader.read(new DataInputStream(clientSocket.getInputStream()));
             } catch (IOException | NullPointerException e) {
@@ -51,8 +53,8 @@ public class IdentificationWorker implements Sleepable, Runnable {
                 closeSocket(clientSocket);
                 throw new RuntimeException(e);
             }
-            sleep(10);
-            timeout += 10;
+            sleep(SLEEP_TIME);
+            timeout += SLEEP_TIME;
         }
 
         if (message == null) {
