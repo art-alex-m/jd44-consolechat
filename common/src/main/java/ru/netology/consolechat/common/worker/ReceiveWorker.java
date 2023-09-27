@@ -25,7 +25,7 @@ public class ReceiveWorker implements Sleepable, Runnable {
         this.reader = reader;
     }
 
-    public void deactivate() {
+    public synchronized void deactivate() {
         loop = false;
     }
 
@@ -37,6 +37,7 @@ public class ReceiveWorker implements Sleepable, Runnable {
                 continue;
             }
             doWork();
+            sleep(10);
         }
     }
 
